@@ -15,9 +15,10 @@ module.exports = {
       },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.(png|svg|jpg|gif)$/, use: 'file-loader' },
+      { test: /\.graphql$/, use: 'raw-loader' },
     ],
   },
-  plugins: [new HtmlWebpackPlugin()],
+  plugins: [new HtmlWebpackPlugin({ template: '/index.html.template' })],
   resolve: {
     extensions: ['.tsx', '.ts', '.js']
   }
