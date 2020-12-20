@@ -12,6 +12,8 @@ module.exports = {
   ],
   rules: {
     "prettier/prettier": ["error", {"printWidth": 80}],
-    "max-len": [2, 80]
+    "max-len": [2, 80],
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
   }
 };
