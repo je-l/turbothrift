@@ -1,0 +1,9 @@
+type ToriItem {
+  title: String!
+  priceEuroCents: Int!
+  postedAt: String!
+}
+
+type Query {
+  allToriItems: [ToriItem!]!
+}
