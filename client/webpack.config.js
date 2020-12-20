@@ -21,5 +21,8 @@ module.exports = {
   plugins: [new HtmlWebpackPlugin({ template: '/index.html.template' })],
   resolve: {
     extensions: ['.tsx', '.ts', '.js']
+  },
+  devServer: {
+    host: '0.0.0.0'
   }
 };
