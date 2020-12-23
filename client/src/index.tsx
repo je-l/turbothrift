@@ -2,6 +2,9 @@ import React from "react";
 import ReactDom from "react-dom";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import ToriList from "./toriList";
+import FrontPage from "./FrontPage";
+
+import "./global.css";
 
 const apolloClient = new ApolloClient({
   uri: "http://localhost:4000",
@@ -10,7 +13,7 @@ const apolloClient = new ApolloClient({
 
 ReactDom.render(
   <ApolloProvider client={apolloClient}>
-    <ToriList />
+    <FrontPage />
   </ApolloProvider>,
   document.querySelector("div#app")
 );

@@ -33,9 +33,11 @@
   },
   "dependencies": {
     "@apollo/client": "^3.3.6",
+    "css-loader": "^5.0.1",
     "graphql": "^15.4.0",
     "luxon": "^1.25.0",
     "react": "^17.0.1",
+    "style-loader": "^2.0.0",
     "styled-components": "^5.2.1"
   }
 }
