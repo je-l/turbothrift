@@ -1,9 +1,14 @@
 type ToriItem {
   title: String!
+  url: String!
   priceEuroCents: Int!
   postedAt: String!
 }
 
 type Query {
-  allToriItems: [ToriItem!]!
+  allToriQueries: [ToriItem!]!
+}
+
+type Mutation {
+  addToriQuery(url: String!): String!
 }
