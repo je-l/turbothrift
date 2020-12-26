@@ -38,7 +38,6 @@ export const FETCH_TORI_QUERIES = gql`
 
 const ToriList = () => {
   const toriItems = useQuery<ToriFetchResult>(FETCH_TORI_QUERIES);
-  console.log("toriItems", toriItems);
 
   if (!toriItems.loading) {
     const items = toriItems.data!.allToriQueries.map((t) => (

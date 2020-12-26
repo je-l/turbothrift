@@ -1,18 +1,8 @@
 import React from "react";
-import styled from "styled-components";
-import {
-  GoogleLogin,
+import GoogleLogin, {
   GoogleLoginResponse,
   GoogleLoginResponseOffline,
 } from "react-google-login";
-
-const TopBracket = styled.div`
-  display: flex;
-
-  width: 100%;
-
-  background-color: lightgray;
-`;
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
@@ -28,19 +18,16 @@ const signIn = (args: GoogleLoginResponse | GoogleLoginResponseOffline) => {
 
   const token = args.getAuthResponse().id_token;
 
+  console.log("args ", args);
+  console.log("idtoken ", token);
+
   localStorage.setItem("token", token);
 };
 
-const TopBar = () => {
-  return (
-    <TopBracket>
-      <GoogleLogin
-        // eslint-disable-next-line max-len
-        clientId={GOOGLE_CLIENT_ID}
-        onSuccess={signIn}
-      />
-    </TopBracket>
-  );
-};
+const SignInPage = () => (
+  <div>
+    <GoogleLogin clientId={GOOGLE_CLIENT_ID} onSuccess={signIn} />
+  </div>
+);
 
-export default TopBar;
+export default SignInPage;

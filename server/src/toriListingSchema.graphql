@@ -1,9 +1,12 @@
+"Represents a tori.fi search"
 type ToriItem {
   id: ID!
+
+  "Title is user supplied descriptive name for the search"
   title: String!
+
+  "Url contains the search parameters and filters"
   url: String!
-  priceEuroCents: Int!
-  postedAt: String!
 }
 
 type Query {

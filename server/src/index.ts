@@ -2,6 +2,14 @@ import { readFileSync } from "fs";
 import camelcaseKeys from "camelcase-keys";
 import { ApolloServer, gql } from "apollo-server";
 import pgPromise from "pg-promise";
+import { OAuth2Client, TokenPayload } from "google-auth-library";
+import { env } from "process";
+
+const GOOGLE_CLIENT_ID = env.GOOGLE_CLIENT_ID;
+
+if (!GOOGLE_CLIENT_ID) {
+  throw new Error("google client id missing");
+}
 
 const toriItemSchema = readFileSync(
   "./src/toriListingSchema.graphql"
@@ -21,18 +29,17 @@ const db = pgp(postgresConnectionOptions);
 
 const typeDefs = gql(toriItemSchema);
 
+const googleAuthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
 const resolvers = {
   Query: {
     allToriQueries: async () => {
-      console.log("alltoriqueriees");
       const items = await db.manyOrNone("SELECT * FROM toriquery");
-      console.log("items");
-      console.log(items);
       return camelcaseKeys(items);
     },
   },
   Mutation: {
-    addToriQuery: async (root: any, args: any) => {
+    addToriQuery: async (_: undefined, args: any, ctx: any) => {
       await db.any(
         `INSERT INTO ToriQuery (
             title,
@@ -50,7 +57,37 @@ const resolvers = {
   },
 };
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const getUser = async (token: string): Promise<TokenPayload> => {
+  const loginTicket = await googleAuthClient.verifyIdToken({
+    idToken: token,
+    audience: GOOGLE_CLIENT_ID,
+  });
+
+  const payload = loginTicket.getPayload();
+
+  if (!payload) {
+    console.error(payload);
+    throw new Error("no payload");
+  }
+
+  return payload;
+};
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: async ({ req }) => {
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return { user: null };
+    }
+
+    const user = await getUser(token.replace("bearer ", ""));
+
+    return { user };
+  },
+});
 
 server
   .listen()
