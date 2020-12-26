@@ -1,9 +1,7 @@
-import { gql, useLazyQuery, useMutation } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import React, { FormEvent, useState } from "react";
-import { useDispatch } from "react-redux";
 import styled from "styled-components";
-
-import { submitForm } from "./toriList.duck";
+import { FETCH_TORI_QUERIES } from "./toriList";
 
 const SearchInput = styled.div`
   display: flex;
@@ -23,13 +21,15 @@ const ADD_TORI_QUERY = gql`
 const ToriSearchInput = () => {
   const [titleValue, setTitleValue] = useState("");
   const [urlValue, setUrlValue] = useState("");
-  const [addToriQuery] = useMutation(ADD_TORI_QUERY);
-  const dispatch = useDispatch();
+  const [addToriQuery] = useMutation(ADD_TORI_QUERY, {
+    refetchQueries: [{ query: FETCH_TORI_QUERIES }],
+  });
 
   const submitting = (e: FormEvent) => {
     e.preventDefault();
     addToriQuery({ variables: { url: urlValue, title: titleValue } });
-    dispatch(submitForm(titleValue, urlValue));
+    setTitleValue("");
+    setUrlValue("");
   };
 
   return (

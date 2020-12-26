@@ -16,11 +16,8 @@ const ItemTitle = styled.div`
   font-size: 18px;
 `;
 
-const ItemDetailLine = styled.div`
-  font-size: 14px;
-`;
-
 interface ToriItem {
+  id: string;
   title: string;
   url: string;
 }
@@ -29,20 +26,23 @@ interface ToriFetchResult {
   allToriQueries: ToriItem[];
 }
 
-const ToriList = () => {
-  const toriItems = useQuery<ToriFetchResult>(gql`
-    query {
-      allToriQueries {
-        title
-        url
-      }
+export const FETCH_TORI_QUERIES = gql`
+  query {
+    allToriQueries {
+      id
+      title
+      url
     }
-  `);
+  }
+`;
+
+const ToriList = () => {
+  const toriItems = useQuery<ToriFetchResult>(FETCH_TORI_QUERIES);
   console.log("toriItems", toriItems);
 
   if (!toriItems.loading) {
     const items = toriItems.data!.allToriQueries.map((t) => (
-      <ItemEntry key={t.title}>
+      <ItemEntry key={t.id}>
         <ItemDescription>
           <ItemTitle>{t.title}</ItemTitle>
           <ItemTitle>{t.url}</ItemTitle>

@@ -1,4 +1,5 @@
 type ToriItem {
+  id: ID!
   title: String!
   url: String!
   priceEuroCents: Int!

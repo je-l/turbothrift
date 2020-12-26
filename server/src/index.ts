@@ -32,7 +32,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    addToriQuery: async (root, args) => {
+    addToriQuery: async (root: any, args: any) => {
       await db.any(
         `INSERT INTO ToriQuery (
             title,
