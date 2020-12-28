@@ -9,10 +9,21 @@ type ToriItem {
   url: String!
 }
 
+"Represents a Turbothrift user authenticated with Google log in"
+type User {
+  id: ID!
+  email: String!
+
+  "Saved searches for this user."
+  searchQueries: [ToriItem!]!
+}
+
 type Query {
   allToriQueries: [ToriItem!]!
+  user: User!
 }
 
 type Mutation {
-  addToriQuery(url: String!): String!
+  addToriQuery(url: String!, title: String!): String!
+  loginAttempt: String!
 }

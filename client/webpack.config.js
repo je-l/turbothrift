@@ -1,5 +1,9 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const createStyledComponentsTransformer = require("typescript-plugin-styled-components")
+  .default;
 const { EnvironmentPlugin } = require("webpack");
+
+const styledComponentsTransformer = createStyledComponentsTransformer();
 
 module.exports = {
   entry: ["./src/index.tsx"],
@@ -12,6 +16,11 @@ module.exports = {
         exclude: /node_modules/,
         use: {
           loader: "ts-loader",
+          options: {
+            getCustomTransformers: () => ({
+              before: [styledComponentsTransformer],
+            }),
+          },
         },
       },
       { test: /\.css$/, use: ["style-loader", "css-loader"] },

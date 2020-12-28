@@ -1,19 +1,22 @@
 import React from "react";
 import styled from "styled-components";
-import { DateTime } from "luxon";
 import { gql, useQuery } from "@apollo/client";
 
 const ItemEntry = styled.div`
   display: flex;
-  margin: 30px;
+  margin: 5px 0;
 `;
 
 const ItemDescription = styled.div`
-  margin: 10px;
+  margin: 10px 0;
 `;
 
 const ItemTitle = styled.div`
   font-size: 18px;
+`;
+
+const ItemUrl = styled.div`
+  font-size: 14px;
 `;
 
 interface ToriItem {
@@ -23,28 +26,30 @@ interface ToriItem {
 }
 
 interface ToriFetchResult {
-  allToriQueries: ToriItem[];
+  user: { searchQueries: ToriItem[] };
 }
 
 export const FETCH_TORI_QUERIES = gql`
   query {
-    allToriQueries {
-      id
-      title
-      url
+    user {
+      searchQueries {
+        id
+        title
+        url
+      }
     }
   }
 `;
 
 const ToriList = () => {
-  const toriItems = useQuery<ToriFetchResult>(FETCH_TORI_QUERIES);
+  const { loading, data } = useQuery<ToriFetchResult>(FETCH_TORI_QUERIES);
 
-  if (!toriItems.loading) {
-    const items = toriItems.data!.allToriQueries.map((t) => (
+  if (!loading) {
+    const items = data!.user.searchQueries.map((t) => (
       <ItemEntry key={t.id}>
         <ItemDescription>
           <ItemTitle>{t.title}</ItemTitle>
-          <ItemTitle>{t.url}</ItemTitle>
+          <ItemUrl>{t.url}</ItemUrl>
         </ItemDescription>
       </ItemEntry>
     ));

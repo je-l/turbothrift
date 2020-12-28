@@ -32,7 +32,27 @@ const typeDefs = gql(toriItemSchema);
 const googleAuthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const resolvers = {
+  User: {
+    searchQueries: async (parentUser: any) => {
+      const searches = await db.manyOrNone(
+        "SELECT * FROM toriquery WHERE app_user = $[userId]",
+        { userId: parentUser.id }
+      );
+
+      return searches;
+    },
+  },
   Query: {
+    user: async (_: undefined, args: any, ctx: any) => {
+      const email = ctx.user.email;
+
+      const user = await db.one(
+        "SELECT * FROM app_user WHERE email = $[email]",
+        { email }
+      );
+
+      return user;
+    },
     allToriQueries: async () => {
       const items = await db.manyOrNone("SELECT * FROM toriquery");
       return camelcaseKeys(items);
@@ -40,19 +60,40 @@ const resolvers = {
   },
   Mutation: {
     addToriQuery: async (_: undefined, args: any, ctx: any) => {
+      const { id: userId } = await db.one(
+        "SELECT id FROM app_user WHERE email = $[email]",
+        {
+          email: ctx.user.email,
+        }
+      );
+
       await db.any(
         `INSERT INTO ToriQuery (
             title,
-            url
+            url,
+            app_user
           ) VALUES (
             $[title],
-            $[url]
+            $[url],
+            $[userId]
           )`,
-        { title: "title", url: args.url }
+        { title: args.title, url: args.url, userId }
       );
       console.log("inserted new toriquery element:");
       console.log(args);
       return "test";
+    },
+    loginAttempt: async (_: undefined, args: any, ctx: any) => {
+      await db.none(
+        `INSERT INTO app_user (email)
+        VALUES ($[email])
+        ON CONFLICT (email) DO NOTHING`,
+        {
+          email: ctx.user.email,
+        }
+      );
+
+      return "ok";
     },
   },
 };

@@ -5,13 +5,14 @@ import {
   InMemoryCache,
   ApolloProvider,
   createHttpLink,
-  gql,
+  useReactiveVar,
 } from "@apollo/client";
 import FrontPage from "./FrontPage";
 import { setContext } from "@apollo/client/link/context";
 
 import "./global.css";
-import SignInPage from "./signInPage";
+import SignInPage from "./SignInPage";
+import { userTokenCache } from "./apolloCache";
 
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem("token");
@@ -24,22 +25,15 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const typeDefs = gql`
-  extend type Query {
-    email: String
-  }
-`;
-
 const httpLink = createHttpLink({ uri: "http://localhost:4000" });
 
 const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
   link: authLink.concat(httpLink),
-  typeDefs,
 });
 
 const AppRoot = () => {
-  const token = localStorage.getItem("token");
+  const token = useReactiveVar(userTokenCache);
 
   if (!token) {
     return <SignInPage />;

@@ -1,17 +1,13 @@
+import { useApolloClient, useReactiveVar } from "@apollo/client";
 import React from "react";
 import styled from "styled-components";
-import {
-  GoogleLogin,
-  GoogleLoginResponse,
-  GoogleLoginResponseOffline,
-} from "react-google-login";
+import { userTokenCache } from "./apolloCache";
+import jwtDecode from "jwt-decode";
 
 const TopBracket = styled.div`
   display: flex;
 
   width: 100%;
-
-  background-color: lightgray;
 `;
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -20,25 +16,31 @@ if (!GOOGLE_CLIENT_ID) {
   throw new Error("client id missing");
 }
 
-const signIn = (args: GoogleLoginResponse | GoogleLoginResponseOffline) => {
-  if (!("getAuthResponse" in args)) {
-    console.error(args);
-    throw new Error("failed to login");
-  }
+const LogOutButton = styled.div`
+  padding: 13px;
+  margin-left: auto;
 
-  const token = args.getAuthResponse().id_token;
-
-  localStorage.setItem("token", token);
-};
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+`;
 
 const TopBar = () => {
+  const userToken = useReactiveVar(userTokenCache);
+  const parsedToken = jwtDecode<{ given_name: string }>(userToken!);
+  const apollo = useApolloClient();
+
+  const logOut = () => {
+    localStorage.removeItem("token");
+    userTokenCache(null);
+    apollo.clearStore();
+  };
+
   return (
     <TopBracket>
-      <GoogleLogin
-        // eslint-disable-next-line max-len
-        clientId={GOOGLE_CLIENT_ID}
-        onSuccess={signIn}
-      />
+      <LogOutButton onClick={logOut}>
+        Log out ({parsedToken.given_name})
+      </LogOutButton>
     </TopBracket>
   );
 };

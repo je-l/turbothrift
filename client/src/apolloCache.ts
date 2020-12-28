@@ -3,10 +3,7 @@
  */
 
 import { makeVar } from "@apollo/client";
-import jsonwebtoken from "jsonwebtoken";
 
 const token = localStorage.getItem("token");
 
-const decodedToken = token ? jsonwebtoken.decode(token) : null;
-
-export const email = makeVar<string>("");
+export const userTokenCache = makeVar<string | null>(token);

@@ -1,14 +1,19 @@
 import React from "react";
+import { MainColumn, MainRow } from "./common/pageLayout";
 import TopBar from "./TopBar";
 import ToriList from "./toriList";
-import ToriSearchInput from "./toriSearchInput";
+import ToriSearchForm from "./toriSearchForm";
 
 const FrontPage = () => (
-  <div>
+  <>
     <TopBar />
-    <ToriSearchInput />
-    <ToriList />
-  </div>
+    <MainRow>
+      <MainColumn>
+        <ToriSearchForm />
+        <ToriList />
+      </MainColumn>
+    </MainRow>
+  </>
 );
 
 export default FrontPage;
