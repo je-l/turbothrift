@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import camelcaseKeys from "camelcase-keys";
-import { ApolloServer, gql } from "apollo-server";
+import { ApolloServer, AuthenticationError, gql } from "apollo-server";
 import pgPromise from "pg-promise";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import { env } from "process";
@@ -44,11 +44,9 @@ const resolvers = {
   },
   Query: {
     user: async (_: undefined, args: any, ctx: any) => {
-      const email = ctx.user.email;
-
       const user = await db.one(
         "SELECT * FROM app_user WHERE email = $[email]",
-        { email }
+        { email: ctx.user.email }
       );
 
       return user;
@@ -81,7 +79,7 @@ const resolvers = {
       );
       console.log("inserted new toriquery element:");
       console.log(args);
-      return "test";
+      return "ok";
     },
     loginAttempt: async (_: undefined, args: any, ctx: any) => {
       await db.none(
@@ -108,20 +106,25 @@ const getUser = async (token: string): Promise<TokenPayload> => {
 
   if (!payload) {
     console.error(payload);
-    throw new Error("no payload");
+    throw new AuthenticationError("no payload");
   }
 
   return payload;
 };
 
 const server = new ApolloServer({
+  formatError: (err) => {
+    console.error(err);
+    return err;
+  },
   typeDefs,
   resolvers,
   context: async ({ req }) => {
     const token = req.headers.authorization;
 
     if (!token) {
-      return { user: null };
+      console.log("token missing");
+      throw new AuthenticationError("token missing from headers");
     }
 
     const user = await getUser(token.replace("bearer ", ""));

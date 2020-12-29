@@ -1,8 +1,8 @@
-import { useApolloClient, useReactiveVar } from "@apollo/client";
+import { gql, useApolloClient, useQuery } from "@apollo/client";
 import React from "react";
 import styled from "styled-components";
-import { userTokenCache } from "./apolloCache";
-import jwtDecode from "jwt-decode";
+import { GoogleLogout } from "react-google-login";
+import { isSignedIn } from "./apolloCache";
 
 const TopBracket = styled.div`
   display: flex;
@@ -16,30 +16,31 @@ if (!GOOGLE_CLIENT_ID) {
   throw new Error("client id missing");
 }
 
-const LogOutButton = styled.div`
-  padding: 13px;
-  margin-left: auto;
 
-  font-size: 14px;
-  font-weight: 900;
+const LogOutButton = styled(GoogleLogout)`
+  margin: 10px 10px 0 auto;
+
   cursor: pointer;
 `;
 
 const TopBar = () => {
-  const userToken = useReactiveVar(userTokenCache);
-  const parsedToken = jwtDecode<{ given_name: string }>(userToken!);
   const apollo = useApolloClient();
 
-  const logOut = () => {
-    localStorage.removeItem("token");
-    userTokenCache(null);
+  const logOut = async () => {
     apollo.clearStore();
+    isSignedIn(false);
+    console.log("sucessfully logged out");
   };
 
   return (
     <TopBracket>
-      <LogOutButton onClick={logOut}>
-        Log out ({parsedToken.given_name})
+      <LogOutButton
+        buttonText="Log out"
+        clientId={GOOGLE_CLIENT_ID}
+        onLogoutSuccess={logOut}
+        onFailure={() => console.error("failed to log out")}
+      >
+        Log out
       </LogOutButton>
     </TopBracket>
   );

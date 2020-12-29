@@ -9,6 +9,8 @@ const ItemEntry = styled.div`
 
 const ItemDescription = styled.div`
   margin: 10px 0;
+
+  flex: 1;
 `;
 
 const ItemTitle = styled.div`
@@ -16,6 +18,13 @@ const ItemTitle = styled.div`
 `;
 
 const ItemUrl = styled.div`
+  flex: 1;
+
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
   font-size: 14px;
 `;
 
@@ -41,6 +50,11 @@ export const FETCH_TORI_QUERIES = gql`
   }
 `;
 
+const Title = styled.div`
+  display: flex;
+  flex: 1;
+`;
+
 const ToriList = () => {
   const { loading, data } = useQuery<ToriFetchResult>(FETCH_TORI_QUERIES);
 
@@ -49,7 +63,9 @@ const ToriList = () => {
       <ItemEntry key={t.id}>
         <ItemDescription>
           <ItemTitle>{t.title}</ItemTitle>
-          <ItemUrl>{t.url}</ItemUrl>
+          <Title>
+            <ItemUrl>{t.url}</ItemUrl>
+          </Title>
         </ItemDescription>
       </ItemEntry>
     ));

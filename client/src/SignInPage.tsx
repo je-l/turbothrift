@@ -4,7 +4,7 @@ import GoogleLogin, {
   GoogleLoginResponse,
   GoogleLoginResponseOffline,
 } from "react-google-login";
-import { userTokenCache } from "./apolloCache";
+import { isSignedIn } from "./apolloCache";
 import { MainColumn, MainRow } from "./common/pageLayout";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -18,9 +18,6 @@ const signIn = (args: GoogleLoginResponse | GoogleLoginResponseOffline) => {
     console.error(args);
     throw new Error("failed to login");
   }
-
-  const token = args.getAuthResponse().id_token;
-  return token;
 };
 
 const LOGIN_ATTEMPT = gql`
@@ -44,12 +41,15 @@ const SignInPage = () => {
         </p>
         <GoogleLogin
           clientId={GOOGLE_CLIENT_ID}
+          // always ask which account to use
+          prompt="select_account"
           onSuccess={async (...args) => {
-            const token = signIn(...args);
-            localStorage.setItem("token", token);
+            console.log("successfully logged in...");
+            signIn(...args);
             await doLogin();
-            userTokenCache(token);
+            isSignedIn(true);
           }}
+          onFailure={(e) => console.error("error logging in", e)}
         />
       </MainColumn>
     </MainRow>
