@@ -32,7 +32,7 @@ test("adding new Tori entries", async () => {
     ) RETURNING id`,
     { userId }
   );
-  await db.one(
+  await db.none(
     `INSERT INTO toriitem (
       item_url,
       title,
@@ -41,13 +41,13 @@ test("adding new Tori entries", async () => {
       'https://www.tori.fi/1',
       'Rossin 54 cm',
       $[queryId]
-    ) RETURNING id`,
+    )`,
     { queryId: toriquery.id }
   );
 
   const newItems: ToriEntry[] = [
-    { title: "jotain", url: "https://www.tori.fi/1" },
-    { title: "jotain", url: "https://www.tori.fi/2" },
+    { title: "Rossin adventure 56cm", url: "https://www.tori.fi/1" },
+    { title: "Bridgestone NJS runko", url: "https://www.tori.fi/2" },
   ];
 
   const emailDao = new EmailDao(db);
