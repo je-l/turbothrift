@@ -1,0 +1,16 @@
+version: '3.7'
+services:
+  scrape:
+    environment:
+      - MAILGUN_API_KEY
+      - MAILGUN_DOMAIN
+      - EMAIL_SENDER_NAME
+      - EMAIL_SENDER_ADDRESS
+    build: scrape
+    restart: "no"
+    networks:
+      - turbothriftnet
+
+networks:
+  turbothriftnet:
+    external: true

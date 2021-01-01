@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 services:
   client:
     build: client
@@ -18,7 +18,11 @@ services:
       - 4000:4000
     environment:
       - GOOGLE_CLIENT_ID
+    networks:
+      - turbothriftnet
   database:
+    networks:
+      - turbothriftnet
     image: postgres:13
     environment:
       POSTGRES_PASSWORD: "1234"
@@ -28,3 +32,7 @@ services:
     volumes:
       - ./database/sql:/docker-entrypoint-initdb.d
       - ./database/postgresql.conf:/etc/postgresql/postgresql.conf
+
+networks:
+  turbothriftnet:
+    name: "turbothriftnet"

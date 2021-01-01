@@ -1,9 +1,10 @@
 import { readFileSync } from "fs";
 import camelcaseKeys from "camelcase-keys";
 import { ApolloServer, AuthenticationError, gql } from "apollo-server";
-import pgPromise from "pg-promise";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import { env } from "process";
+import { Context, User } from "./toriItem";
+import { createDbSession } from "./database";
 
 const GOOGLE_CLIENT_ID = env.GOOGLE_CLIENT_ID;
 
@@ -15,25 +16,13 @@ const toriItemSchema = readFileSync(
   "./src/toriListingSchema.graphql"
 ).toString();
 
-const pgp = pgPromise({});
-
-const postgresConnectionOptions = {
-  username: "postgres",
-  host: "database",
-  database: "postgres",
-  user: "postgres",
-  password: "1234",
-};
-
-const db = pgp(postgresConnectionOptions);
-
-const typeDefs = gql(toriItemSchema);
+const db = createDbSession();
 
 const googleAuthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const resolvers = {
   User: {
-    searchQueries: async (parentUser: any) => {
+    searchQueries: async (parentUser: User) => {
       const searches = await db.manyOrNone(
         "SELECT * FROM toriquery WHERE app_user = $[userId]",
         { userId: parentUser.id }
@@ -43,7 +32,7 @@ const resolvers = {
     },
   },
   Query: {
-    user: async (_: undefined, args: any, ctx: any) => {
+    user: async (_: undefined, args: unknown, ctx: Context) => {
       const user = await db.one(
         "SELECT * FROM app_user WHERE email = $[email]",
         { email: ctx.user.email }
@@ -57,7 +46,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    addToriQuery: async (_: undefined, args: any, ctx: any) => {
+    addToriQuery: async (_: undefined, args: any, ctx: Context) => {
       const { id: userId } = await db.one(
         "SELECT id FROM app_user WHERE email = $[email]",
         {
@@ -81,7 +70,7 @@ const resolvers = {
       console.log(args);
       return "ok";
     },
-    loginAttempt: async (_: undefined, args: any, ctx: any) => {
+    loginAttempt: async (_: undefined, args: any, ctx: Context) => {
       await db.none(
         `INSERT INTO app_user (email)
         VALUES ($[email])
@@ -117,7 +106,7 @@ const server = new ApolloServer({
     console.error(err);
     return err;
   },
-  typeDefs,
+  typeDefs: gql(toriItemSchema),
   resolvers,
   context: async ({ req }) => {
     const token = req.headers.authorization;

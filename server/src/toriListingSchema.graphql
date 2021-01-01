@@ -1,5 +1,5 @@
 "Represents a tori.fi search"
-type ToriItem {
+type ToriSearch {
   id: ID!
 
   "Title is user supplied descriptive name for the search"
@@ -15,11 +15,11 @@ type User {
   email: String!
 
   "Saved searches for this user."
-  searchQueries: [ToriItem!]!
+  searchQueries: [ToriSearch!]!
 }
 
 type Query {
-  allToriQueries: [ToriItem!]!
+  allToriQueries: [ToriSearch!]!
   user: User!
 }
 
