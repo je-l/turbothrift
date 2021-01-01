@@ -4,14 +4,10 @@ import GoogleLogin, {
   GoogleLoginResponse,
   GoogleLoginResponseOffline,
 } from "react-google-login";
+
 import { isSignedIn } from "./apolloCache";
 import { MainColumn, MainRow } from "./common/pageLayout";
-
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-
-if (!GOOGLE_CLIENT_ID) {
-  throw new Error("client id missing");
-}
+import { config } from "./config";
 
 const signIn = (args: GoogleLoginResponse | GoogleLoginResponseOffline) => {
   if (!("getAuthResponse" in args)) {
@@ -40,7 +36,7 @@ const SignInPage = () => {
           alerts.
         </p>
         <GoogleLogin
-          clientId={GOOGLE_CLIENT_ID}
+          clientId={config.GOOGLE_CLIENT_ID}
           // always ask which account to use
           prompt="select_account"
           onSuccess={async (...args) => {

@@ -6,8 +6,6 @@ import {
   ApolloProvider,
   createHttpLink,
   useReactiveVar,
-  gql,
-  useQuery,
 } from "@apollo/client";
 import FrontPage from "./FrontPage";
 import { setContext } from "@apollo/client/link/context";

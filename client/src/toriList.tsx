@@ -4,13 +4,14 @@ import { gql, useQuery } from "@apollo/client";
 
 const ItemEntry = styled.div`
   display: flex;
+
   margin: 5px 0;
 `;
 
 const ItemDescription = styled.div`
-  margin: 10px 0;
-
   flex: 1;
+
+  margin: 10px 0;
 `;
 
 const ItemTitle = styled.div`
@@ -26,6 +27,11 @@ const ItemUrl = styled.div`
   text-overflow: ellipsis;
 
   font-size: 14px;
+`;
+
+const Title = styled.div`
+  display: flex;
+  flex: 1;
 `;
 
 interface ToriItem {
@@ -48,11 +54,6 @@ export const FETCH_TORI_QUERIES = gql`
       }
     }
   }
-`;
-
-const Title = styled.div`
-  display: flex;
-  flex: 1;
 `;
 
 const ToriList = () => {

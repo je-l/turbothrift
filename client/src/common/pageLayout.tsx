@@ -1,5 +1,8 @@
 import styled from "styled-components";
 
+/**
+ * Primary page column which leaves empty space on wide screens to sides.
+ */
 export const MainColumn = styled.div`
   flex: 1;
 

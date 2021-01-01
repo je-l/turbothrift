@@ -1,21 +1,16 @@
-import { gql, useApolloClient, useQuery } from "@apollo/client";
+import { useApolloClient } from "@apollo/client";
 import React from "react";
 import styled from "styled-components";
 import { GoogleLogout } from "react-google-login";
+
 import { isSignedIn } from "./apolloCache";
+import { config } from "./config";
 
 const TopBracket = styled.div`
   display: flex;
 
   width: 100%;
 `;
-
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-
-if (!GOOGLE_CLIENT_ID) {
-  throw new Error("client id missing");
-}
-
 
 const LogOutButton = styled(GoogleLogout)`
   margin: 10px 10px 0 auto;
@@ -36,7 +31,7 @@ const TopBar = () => {
     <TopBracket>
       <LogOutButton
         buttonText="Log out"
-        clientId={GOOGLE_CLIENT_ID}
+        clientId={config.GOOGLE_CLIENT_ID}
         onLogoutSuccess={logOut}
         onFailure={() => console.error("failed to log out")}
       >

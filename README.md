@@ -1,6 +1,7 @@
 # Turbothrift
 
-Turbothrift is a web service for monitoring new sale items.
+Turbothrift is a web service for monitoring new sale items for online
+thrifting.
 
 ### Development
 
@@ -10,12 +11,16 @@ Turbothrift is a web service for monitoring new sale items.
 
 The client and server are now running. Open client at http://localhost:8080
 
+The Graphql playground is visible at http://localhost:4000/
+
 ### Email cronjob
 
-Run unit tests for web scraping service and email jobs:
+The service runs periodic email cronjob which sends notifications for new list items.
+
+Run unit tests for the web scraper.
 
 `docker-compose -f docker-compose.scrape.yaml build && docker-compose -f docker-compose.scrape.yaml run --rm scrape npm test`
 
-Run the job manually:
+Run the web scraping job manually and send emails for new items:
 
 `docker-compose -f docker-compose.scrape.yaml build && docker-compose -f docker-compose.scrape.yaml run --rm scrape`
