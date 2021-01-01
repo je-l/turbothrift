@@ -1,24 +1,27 @@
 import axios from "axios";
 import { createDatabaseSession } from "./src/database";
 import { parseToriListing, ToriEntry } from "./src/parseTori";
-import { EmailDao } from "./src/sendEmails";
+import { EmailDao, sendEmailsForUser } from "./src/sendEmails";
+import pMapSeries from "p-map-series";
 
+const formatMessage = (insertedItems: ToriEntry[]): string => {
+  return insertedItems.map((item) => `${item.title}\n${item.url}`).join("\n\n");
+};
 
 const main = async () => {
   const db = await createDatabaseSession();
   const emailDao = new EmailDao(db);
-  await emailDao.saveNewItems(
-    [
-      { url: "https://www.tori.fi/1", title: "asd" },
-      { url: "https://www.tori.fi/2", title: "asd" },
-      { url: "https://www.tori.fi/3", title: "asd" },
-    ],
-    1
-  );
-  // await db.any("SELECT 1");
-  // const url = "https://www.tori.fi/uusimaa?ca=18&s=1&w=1";
-  // const entries = await fetchEntriesForUrl(url);
-  // console.log(entries);
+  const queries = await emailDao.fetchAllQueries();
+
+  await pMapSeries(queries, async (query) => {
+    const { data } = await axios.get(query.url);
+    const currentItems = parseToriListing(data);
+    const savedNewItems = await emailDao.saveNewItems(currentItems, query.id);
+    const email = await emailDao.emailForId(query.appUser);
+    // TODO: implement DAO method
+    const message = formatMessage(savedNewItems);
+    await sendEmailsForUser(email, message);
+  });
   db.$pool.end();
 };
 

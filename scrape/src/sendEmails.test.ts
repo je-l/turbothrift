@@ -45,21 +45,24 @@ test("adding new Tori entries", async () => {
     { queryId: toriquery.id }
   );
 
+  // One old item, two new items for insertion.
   const newItems: ToriEntry[] = [
     { title: "Rossin adventure 56cm", url: "https://www.tori.fi/1" },
     { title: "Bridgestone NJS runko", url: "https://www.tori.fi/2" },
+    { title: "Makino track", url: "https://www.tori.fi/3" },
   ];
 
   const emailDao = new EmailDao(db);
 
   const newIds = await emailDao.saveNewItems(newItems, toriquery.id);
 
-  expect(newIds.length).toBe(1);
+  expect(newIds.length).toBe(2);
   const newItemsInDb = await db.many("SELECT item_url FROM toriitem");
 
   expect(newItemsInDb.map((i) => i.item_url)).toEqual([
     "https://www.tori.fi/1",
     "https://www.tori.fi/2",
+    "https://www.tori.fi/3",
   ]);
 });
 

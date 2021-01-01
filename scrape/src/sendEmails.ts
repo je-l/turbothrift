@@ -4,6 +4,7 @@ import { env } from "process";
 import { ToriEntry } from "./parseTori";
 import pMapSeries from "p-map-series";
 import { IDatabase } from "pg-promise";
+import camelcaseKeys from "camelcase-keys";
 
 interface AppUser {
   id: string;
@@ -30,14 +31,31 @@ const mailgun = initMailgun({
   domain: MAILGUN_DOMAIN,
 });
 
+interface ToriQuery {
+  url: string;
+  id: string;
+  appUser: string;
+}
+
 export class EmailDao {
-  constructor(private database: IDatabase<any, IClient>) {}
+  constructor(private database: IDatabase<unknown, IClient>) {}
 
   public async fetchAllUsers() {
     const users = await this.database.manyOrNone<AppUser[]>(
-      "SELECT id, email FROM app_user"
+      "SELECT id, email, app_user FROM app_user"
     );
-    return users;
+    return camelcaseKeys(users);
+  }
+
+  public async fetchAllQueries(): Promise<ToriQuery[]> {
+    const query = "SELECT url, id FROM toriquery";
+
+    return this.database.manyOrNone(query);
+  }
+
+  public async emailForId(id: string): Promise<string> {
+    const query = "SELECT email FROM app_user WHERE id = $[id]";
+    return this.database.one(query, { id });
   }
 
   /**
@@ -46,7 +64,7 @@ export class EmailDao {
    */
   public async saveNewItems(
     newToriItems: ToriEntry[],
-    queryId: number
+    queryId: string
   ): Promise<number[]> {
     const insertedToriItems = await this.database.tx(async (t) => {
       const results = await pMapSeries(newToriItems, async (item) => {
@@ -75,16 +93,12 @@ export class EmailDao {
   }
 }
 
-export const sendEmailsForUser = async (
-  email: string,
-  emailDao: EmailDao,
-  newToriEntries: ToriEntry[]
-) => {
+export const sendEmailsForUser = async (email: string, message: string) => {
   const sendData = {
     from: `${EMAIL_SENDER_NAME} <${EMAIL_SENDER_ADDRESS}>`,
     to: email,
-    subject: "testing",
-    text: "Testing testing",
+    subject: "New items in Turbothrift",
+    text: message,
   };
   await mailgun.messages().send(sendData);
   console.log(`sent email to ${email}`);
