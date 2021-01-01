@@ -12,6 +12,9 @@ export interface User {
   searchQueries: ToriSearch[];
 }
 
+/**
+ * Apollo resolver context.
+ */
 export interface Context {
   user: TokenPayload;
 }
