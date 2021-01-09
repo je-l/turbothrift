@@ -46,9 +46,9 @@ export default class ToriDao {
   public async findToriItems(ids: string[]): Promise<ToriItem[]> {
     if (ids.length === 0) return [];
 
-    const query = "SELECT * FROM toriitem WHERE id IN ($1:list)";
+    const query = "SELECT * FROM toriitem WHERE id IN ($[ids:list])";
 
-    return await this.database.manyOrNone(query, [ids]);
+    return await this.database.manyOrNone(query, { ids });
   }
 
   /**

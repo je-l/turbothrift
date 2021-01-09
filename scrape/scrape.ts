@@ -32,8 +32,6 @@ export const createMessages = async (
       const savedNewItems = await toriDao.saveNewItems(currentItems, query.id);
       const insertedToriItems = await toriDao.findToriItems(savedNewItems);
 
-      console.log("insertedtoriitems", insertedToriItems);
-
       return {
         to: user.email,
         message: `${query.title}\n\n${formatMessage(insertedToriItems)}`,
