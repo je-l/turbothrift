@@ -19,7 +19,7 @@ test("very basic tori query", () => {
   const items = parseToriListing(BASIC_TORI_HTML);
 
   expect(items.length).toBe(40);
-  expect(items[0].url).toBe(
+  expect(items[0].itemUrl).toBe(
     "https://www.tori.fi/uusimaa/Fjallraven_Kaipak_58_76186264.htm?ca=18&w=1"
   );
 });
@@ -35,7 +35,7 @@ test("complex tori search", () => {
   const entries = parseToriListing(COMPLEX_TORI_QUERY_HTML);
 
   expect(entries.length).toBe(5);
-  expect(entries[entries.length - 1].url).toBe(
+  expect(entries[entries.length - 1].itemUrl).toBe(
     // eslint-disable-next-line max-len
     "https://www.tori.fi/uusimaa/Yli_300kpl_Bone_Collection_puhelimen_suojakuoria_75042645.htm?ca=18&w=1&last=1"
   );

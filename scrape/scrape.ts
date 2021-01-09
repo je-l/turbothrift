@@ -1,28 +1,52 @@
 import axios from "axios";
-import { createDatabaseSession } from "./src/database";
-import { parseToriListing, ToriEntry } from "./src/parseTori";
-import { EmailDao, sendEmailsForUser } from "./src/sendEmails";
+import betterAxiosTrace from "axios-better-stacktrace";
 import pMapSeries from "p-map-series";
+import { IDatabase } from "pg-promise";
+import { IClient } from "pg-promise/typescript/pg-subset";
+import { flatten } from "ramda";
 
-const formatMessage = (insertedItems: ToriEntry[]): string => {
-  return insertedItems.map((item) => `${item.title}\n${item.url}`).join("\n\n");
+import { ToriItem } from "./src/parseTori";
+import { sendEmailsForUser, EmailMesssage } from "./src/sendEmails";
+import { fetchNewItemsForUrl } from "./src/toriApi";
+import ToriDao from "./src/toriDao";
+
+betterAxiosTrace(axios);
+
+const formatMessage = (insertedItems: ToriItem[]): string => {
+  return insertedItems
+    .map((item) => `${item.title}\n${item.itemUrl}`)
+    .join("\n\n");
 };
 
-const main = async () => {
-  const db = await createDatabaseSession();
-  const emailDao = new EmailDao(db);
-  const queries = await emailDao.fetchAllQueries();
+export const createMessages = async (
+  db: IDatabase<unknown, IClient>
+): Promise<EmailMesssage[]> => {
+  const toriDao = new ToriDao(db);
+  const users = await toriDao.fetchAllUsers();
 
-  await pMapSeries(queries, async (query) => {
-    const { data } = await axios.get(query.url);
-    const currentItems = parseToriListing(data);
-    const savedNewItems = await emailDao.saveNewItems(currentItems, query.id);
-    const email = await emailDao.emailForId(query.appUser);
-    // TODO: implement DAO method
-    const message = formatMessage(savedNewItems);
-    await sendEmailsForUser(email, message);
+  const nestedMessages = await pMapSeries(users, async (user) => {
+    const queriesForUser = await toriDao.fetchQueriesForUserId(user.id);
+
+    return await pMapSeries(queriesForUser, async (query) => {
+      const currentItems = await fetchNewItemsForUrl(query.url);
+      const savedNewItems = await toriDao.saveNewItems(currentItems, query.id);
+      const insertedToriItems = await toriDao.findToriItems(savedNewItems);
+
+      console.log("insertedtoriitems", insertedToriItems);
+
+      return {
+        to: user.email,
+        message: `${query.title}\n\n${formatMessage(insertedToriItems)}`,
+      };
+    });
   });
-  db.$pool.end();
+
+  return flatten(nestedMessages);
 };
 
-main();
+export const main = async (db: IDatabase<unknown, IClient>) => {
+  const messages = await createMessages(db);
+  await pMapSeries(messages, async (message) => {
+    await sendEmailsForUser(message);
+  });
+};

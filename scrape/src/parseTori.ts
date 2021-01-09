@@ -1,11 +1,11 @@
 import cheerio from "cheerio";
 
-export interface ToriEntry {
-  url: string;
+export interface ToriItem {
+  itemUrl: string;
   title: string;
 }
 
-export const parseToriListing = (html: string): ToriEntry[] => {
+export const parseToriListing = (html: string): ToriItem[] => {
   const $ = cheerio.load(html);
   const linksForPage = $(
     "div.list_mode_thumb > a:not(:has(div.polepos_marker))"
@@ -19,7 +19,7 @@ export const parseToriListing = (html: string): ToriEntry[] => {
         .trim()
         .replace(/\s+/g, " ");
 
-      return { url, title };
+      return { itemUrl: url, title };
     });
 
   return linksForPage;

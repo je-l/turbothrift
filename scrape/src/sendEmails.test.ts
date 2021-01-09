@@ -1,18 +1,28 @@
 import { IDatabase } from "pg-promise";
 import { IClient } from "pg-promise/typescript/pg-subset";
 import { createDatabaseSession } from "./database";
-import { ToriEntry } from "./parseTori";
-import { EmailDao } from "./sendEmails";
+import { ToriItem } from "./parseTori";
+import ToriDao from "./toriDao";
+import { createMessages } from "../scrape";
+import { EmailMesssage } from "./sendEmails";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-let db: IDatabase<any, IClient> = null;
+let db: IDatabase<unknown, IClient> = null;
 
 beforeAll(async () => {
   db = await createDatabaseSession();
 });
 
-test("adding new Tori entries", async () => {
+jest.mock("./toriApi", () => ({
+  fetchNewItemsForUrl: () =>
+    Promise.resolve([
+      { itemUrl: "https://www.tori.fi/12345", title: "Bridgestone" },
+      { itemUrl: "https://www.tori.fi/1", title: "Rossin 54 cm" },
+    ] as ToriItem[]),
+}));
+
+test("functionaltest", async () => {
   await db.none("DELETE FROM toriitem;");
   await db.none("DELETE FROM toriquery;");
   await db.none("DELETE FROM app_user;");
@@ -27,7 +37,7 @@ test("adding new Tori entries", async () => {
       url
     ) VALUES (
       $[userId],
-      'haun otsikko',
+      'My turbothrift search',
       'https://www.tori.fi/123'
     ) RETURNING id`,
     { userId }
@@ -45,25 +55,17 @@ test("adding new Tori entries", async () => {
     { queryId: toriquery.id }
   );
 
-  // One old item, two new items for insertion.
-  const newItems: ToriEntry[] = [
-    { title: "Rossin adventure 56cm", url: "https://www.tori.fi/1" },
-    { title: "Bridgestone NJS runko", url: "https://www.tori.fi/2" },
-    { title: "Makino track", url: "https://www.tori.fi/3" },
+  const messages = await createMessages(db);
+
+  const expected: EmailMesssage[] = [
+    {
+      to: "user@example.com",
+      message:
+        "My turbothrift search\n\nBridgestone\nhttps://www.tori.fi/12345",
+    },
   ];
 
-  const emailDao = new EmailDao(db);
-
-  const newIds = await emailDao.saveNewItems(newItems, toriquery.id);
-
-  expect(newIds.length).toBe(2);
-  const newItemsInDb = await db.many("SELECT item_url FROM toriitem");
-
-  expect(newItemsInDb.map((i) => i.item_url)).toEqual([
-    "https://www.tori.fi/1",
-    "https://www.tori.fi/2",
-    "https://www.tori.fi/3",
-  ]);
+  expect(messages).toEqual(expected);
 });
 
 afterAll(async () => {
