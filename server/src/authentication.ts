@@ -16,8 +16,17 @@ const googleAuthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
  * https://developers.google.com/identity/sign-in/web/backend-auth
  */
 export const verifyGoogleIdToken = async (
-  token: string
+  headers: Record<string, string>
 ): Promise<TokenPayload> => {
+  const tokenHeader = headers.authorization;
+
+  if (!tokenHeader) {
+    console.log("token missing");
+    throw new AuthenticationError("token missing from header");
+  }
+
+  const token = tokenHeader.replace("bearer ", "");
+
   const loginTicket = await googleAuthClient.verifyIdToken({
     idToken: token,
     audience: GOOGLE_CLIENT_ID,

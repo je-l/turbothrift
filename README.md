@@ -13,6 +13,8 @@ The client and server are now running. Open client at http://localhost:8080
 
 The Graphql playground is visible at http://localhost:4000/
 
+Collect server test coverage with `docker-compose exec server npm run coverage && docker cp turbothrift_server_1:/app/coverage .`
+
 ### Email cronjob
 
 The service runs periodic email cronjob which sends notifications for new list items.
