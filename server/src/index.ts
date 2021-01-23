@@ -3,7 +3,7 @@ import cors from "@koa/cors";
 import koaRouter from "koa-router";
 import { ApolloServer } from "apollo-server-koa";
 import { readFileSync } from "fs";
-import { gql } from "apollo-server";
+import { AuthenticationError, gql } from "apollo-server";
 import { createDbSession } from "./database";
 import { verifyGoogleIdToken } from "./authentication";
 import { createResolvers } from "./toriResolvers";
@@ -32,7 +32,7 @@ const server = new ApolloServer({
 
     if (!token) {
       console.log("token missing");
-      return { ...ctx, user: null };
+      throw new AuthenticationError("token missing from header")
     }
 
     const user = await verifyGoogleIdToken(token.replace("bearer ", ""));

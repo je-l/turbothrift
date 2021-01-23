@@ -1,4 +1,4 @@
-import { AuthenticationError, IResolvers } from "apollo-server";
+import { IResolvers } from "apollo-server";
 import camelcaseKeys from "camelcase-keys";
 import { IDatabase } from "pg-promise";
 import { Context, User } from "./toriItem";
@@ -20,10 +20,6 @@ export const createResolvers = (
     },
     Query: {
       user: async (_, args, { user }) => {
-        if (!user) {
-          throw new AuthenticationError("not logged in");
-        }
-
         const createdUser = await db.one(
           "SELECT * FROM app_user WHERE email = $[email]",
           { email: user.email }
@@ -38,9 +34,6 @@ export const createResolvers = (
     },
     Mutation: {
       addToriQuery: async (_, args, ctx) => {
-        if (!ctx.user) {
-          throw new AuthenticationError("not logged in");
-        }
         const { id: userId } = await db.one(
           "SELECT id FROM app_user WHERE email = $[email]",
           {
