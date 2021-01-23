@@ -1,4 +1,4 @@
-import { IResolvers } from "apollo-server";
+import { AuthenticationError, IResolvers } from "apollo-server";
 import camelcaseKeys from "camelcase-keys";
 import { IDatabase } from "pg-promise";
 import { Context, User } from "./toriItem";
@@ -19,13 +19,17 @@ export const createResolvers = (
       },
     },
     Query: {
-      user: async (_, args, ctx) => {
-        const user = await db.one(
+      user: async (_, args, { user }) => {
+        if (!user) {
+          throw new AuthenticationError("not logged in");
+        }
+
+        const createdUser = await db.one(
           "SELECT * FROM app_user WHERE email = $[email]",
-          { email: ctx.user.email }
+          { email: user.email }
         );
 
-        return user;
+        return createdUser;
       },
       allToriQueries: async () => {
         const items = await db.manyOrNone("SELECT * FROM toriquery");
@@ -34,6 +38,9 @@ export const createResolvers = (
     },
     Mutation: {
       addToriQuery: async (_, args, ctx) => {
+        if (!ctx.user) {
+          throw new AuthenticationError("not logged in");
+        }
         const { id: userId } = await db.one(
           "SELECT id FROM app_user WHERE email = $[email]",
           {
@@ -57,16 +64,16 @@ export const createResolvers = (
         console.log(args);
         return "ok";
       },
-      loginAttempt: async (_, args, ctx) => {
+      loginAttempt: async (_, args, ctx: Context) => {
+        const email = ctx.user.email;
         await db.none(
           `INSERT INTO app_user (email)
           VALUES ($[email])
           ON CONFLICT (email) DO NOTHING`,
           {
-            email: ctx.user.email,
+            email,
           }
         );
-
         return "ok";
       },
     },

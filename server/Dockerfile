@@ -8,4 +8,6 @@ RUN npm i
 
 COPY . /app
 
+ENV PATH $PATH:./node_modules/.bin
+
 CMD ["npm", "start"]

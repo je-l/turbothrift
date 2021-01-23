@@ -24,7 +24,6 @@ const TopBar = () => {
   const logOut = async () => {
     apollo.clearStore();
     isSignedIn(false);
-    console.log("sucessfully logged out");
   };
 
   return (

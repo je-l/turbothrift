@@ -1,5 +1,9 @@
+import koa, { Context } from "koa";
+import cors from "@koa/cors";
+import koaRouter from "koa-router";
+import { ApolloServer } from "apollo-server-koa";
 import { readFileSync } from "fs";
-import { ApolloServer, AuthenticationError, gql } from "apollo-server";
+import { gql } from "apollo-server";
 import { createDbSession } from "./database";
 import { verifyGoogleIdToken } from "./authentication";
 import { createResolvers } from "./toriResolvers";
@@ -10,28 +14,35 @@ const toriItemSchema = readFileSync(
 
 const db = createDbSession();
 
+const app = new koa();
+app.use(cors({ credentials: true }));
+const router = new koaRouter();
+
 const server = new ApolloServer({
   formatError: (err) => {
     console.error(err);
+    console.log(JSON.stringify(err));
+    console.log(err.extensions!.exception.stacktrace);
     return err;
   },
   typeDefs: gql(toriItemSchema),
   resolvers: createResolvers(db),
-  context: async ({ req }) => {
-    const token = req.headers.authorization;
+  context: async ({ ctx }) => {
+    const token = ctx.header.authorization;
 
     if (!token) {
       console.log("token missing");
-      throw new AuthenticationError("token missing from headers");
+      return { ...ctx, user: null };
     }
 
     const user = await verifyGoogleIdToken(token.replace("bearer ", ""));
 
-    return { user };
+    return { ...ctx, user };
   },
 });
+app.use(router.routes());
+app.use(router.allowedMethods());
 
-server
-  .listen()
-  .then(({ url }) => console.log("apollo server started: " + url))
-  .catch((e) => console.error(e));
+server.applyMiddleware({ app });
+
+app.listen({ port: 4000 }, () => console.log("ready"));

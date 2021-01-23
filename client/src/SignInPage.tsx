@@ -1,20 +1,10 @@
 import { gql, useMutation } from "@apollo/client";
 import React from "react";
-import GoogleLogin, {
-  GoogleLoginResponse,
-  GoogleLoginResponseOffline,
-} from "react-google-login";
+import { GoogleLogin } from "react-google-login";
 
 import { isSignedIn } from "./apolloCache";
 import { MainColumn, MainRow } from "./common/pageLayout";
 import { config } from "./config";
-
-const signIn = (args: GoogleLoginResponse | GoogleLoginResponseOffline) => {
-  if (!("getAuthResponse" in args)) {
-    console.error(args);
-    throw new Error("failed to login");
-  }
-};
 
 const LOGIN_ATTEMPT = gql`
   mutation {
@@ -22,8 +12,12 @@ const LOGIN_ATTEMPT = gql`
   }
 `;
 
+interface LoginattemptResponse {
+  loginAttempt: string;
+}
+
 const SignInPage = () => {
-  const [doLogin] = useMutation(LOGIN_ATTEMPT);
+  const [doLogin] = useMutation<LoginattemptResponse>(LOGIN_ATTEMPT);
 
   return (
     <MainRow>
@@ -37,11 +31,9 @@ const SignInPage = () => {
         </p>
         <GoogleLogin
           clientId={config.GOOGLE_CLIENT_ID}
-          // always ask which account to use
-          prompt="select_account"
-          onSuccess={async (...args) => {
-            console.log("successfully logged in...");
-            signIn(...args);
+          accessType="offline"
+          prompt="consent"
+          onSuccess={async () => {
             await doLogin();
             isSignedIn(true);
           }}
