@@ -1,6 +1,7 @@
 version: '3.7'
 services:
   client:
+    image: ghcr.io/je-l/turbothrift_client
     build: client
     volumes:
       - ./client:/app

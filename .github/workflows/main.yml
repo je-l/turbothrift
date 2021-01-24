@@ -3,9 +3,8 @@ name: CI
 on: push
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  test_server:
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: whoan/docker-build-with-cache-action@v5
@@ -16,4 +15,33 @@ jobs:
           image_name: turbothrift_server
           context: server
       - run: docker-compose run --entrypoint "wait-for-it -s database:5432 -- npx jest ." server
+      - run: docker-compose logs
+
+  test_client:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: whoan/docker-build-with-cache-action@v5
+        with:
+          username: je-l
+          password: "${{ secrets.TURBOTHRIFT_PAT }}"
+          registry: ghcr.io
+          image_name: turbothrift_client
+          context: client
+      - run: docker-compose run client npm run lint
+
+  test_scrape_job:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: whoan/docker-build-with-cache-action@v5
+        with:
+          username: je-l
+          password: "${{ secrets.TURBOTHRIFT_PAT }}"
+          registry: ghcr.io
+          image_name: turbothrift_scrape
+          context: scrape
+      - run: cp .env.example .env
+      - run: docker-compose up -d database
+      - run: docker-compose -f docker-compose.scrape.yaml run --rm --entrypoint "wait-for-it -s database:5432 -- npm test" scrape
       - run: docker-compose logs
