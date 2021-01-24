@@ -10,7 +10,7 @@ services:
     environment:
       - GOOGLE_CLIENT_ID
   server:
-    build: server
+    image: ghcr.io/je-l/turbothrift_server
     volumes:
       - ./server:/app
       - /app/node_modules
@@ -20,6 +20,8 @@ services:
       - GOOGLE_CLIENT_ID
     networks:
       - turbothriftnet
+    depends_on:
+      - database
   database:
     networks:
       - turbothriftnet

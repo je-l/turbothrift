@@ -1,0 +1,19 @@
+name: CI
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: whoan/docker-build-with-cache-action@v5
+        with:
+          username: je-l
+          password: "${{ secrets.TURBOTHRIFT_PAT }}"
+          registry: ghcr.io
+          image_name: turbothrift_server
+          context: server
+      - run: docker-compose run --entrypoint "wait-for-it -s database:5432 -- npx jest ." server
+      - run: docker-compose logs
