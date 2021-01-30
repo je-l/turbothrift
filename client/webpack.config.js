@@ -7,7 +7,6 @@ const styledComponentsTransformer = createStyledComponentsTransformer();
 
 module.exports = {
   entry: ["./src/index.tsx"],
-  mode: "development",
   devtool: "inline-source-map",
   module: {
     rules: [

@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   client:
-    image: ghcr.io/je-l/turbothrift_client
+    image: gcr.io/turbothrift/turbothrift_client_dev
     build: client
     volumes:
       - ./client:/app
@@ -11,7 +11,7 @@ services:
     environment:
       - GOOGLE_CLIENT_ID
   server:
-    image: ghcr.io/je-l/turbothrift_server
+    image: gcr.io/turbothrift/turbothrift_server_dev
     volumes:
       - ./server:/app
       - /app/node_modules

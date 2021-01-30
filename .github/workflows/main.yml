@@ -9,10 +9,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: whoan/docker-build-with-cache-action@v5
         with:
-          username: je-l
-          password: "${{ secrets.TURBOTHRIFT_PAT }}"
-          registry: ghcr.io
-          image_name: turbothrift_server
+          username: _json_key
+          password: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+          registry: gcr.io
+          image_name: turbothrift_server_dev
           context: server
       - run: docker-compose run --entrypoint "wait-for-it -s database:5432 -- npx jest ." server
       - run: docker-compose logs
@@ -23,10 +23,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: whoan/docker-build-with-cache-action@v5
         with:
-          username: je-l
-          password: "${{ secrets.TURBOTHRIFT_PAT }}"
-          registry: ghcr.io
-          image_name: turbothrift_client
+          username: _json_key
+          password: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+          registry: gcr.io
+          image_name: turbothrift_client_dev
           context: client
       - run: docker-compose run client npm run lint
 
@@ -36,12 +36,45 @@ jobs:
       - uses: actions/checkout@v2
       - uses: whoan/docker-build-with-cache-action@v5
         with:
-          username: je-l
-          password: "${{ secrets.TURBOTHRIFT_PAT }}"
-          registry: ghcr.io
-          image_name: turbothrift_scrape
+          username: _json_key
+          password: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+          registry: gcr.io
+          image_name: turbothrift_scrape_dev
           context: scrape
       - run: cp .env.example .env
       - run: docker-compose up -d database
       - run: docker-compose -f docker-compose.scrape.yaml run --rm --entrypoint "wait-for-it -s database:5432 -- npm test" scrape
       - run: docker-compose logs
+
+  build_client:
+    needs: [test_client, test_server, test_scrape_job]
+    runs-on: ubuntu-20.04
+    env:
+      GOOGLE_CLIENT_ID: "${{ secrets.GOOGLE_CLIENT_ID }}"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: whoan/docker-build-with-cache-action@v5
+        with:
+          username: _json_key
+          password: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+          registry: gcr.io
+          image_name: turbothrift_client_release
+          context: client
+          dockerfile: Dockerfile.prod
+
+  deploy:
+    defaults:
+      run:
+        working-directory: terraform
+    needs: [build_client]
+    runs-on: ubuntu-20.04
+    env:
+      GOOGLE_SERVICEACCOUNT: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/googlecreds
+      TF_IN_AUTOMATION: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v1
+      - run: echo $GOOGLE_SERVICEACCOUNT > /tmp/googlecreds
+      - run: terraform init
+      - run: terraform apply -auto-approve
