@@ -1,4 +1,6 @@
+require('cypress-terminal-report/src/installLogsCollector')();
 import 'cypress-axe';
+
 
 // ***********************************************************
 // This example support/index.js is processed and

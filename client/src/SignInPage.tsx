@@ -22,23 +22,28 @@ const SignInPage = () => {
   return (
     <MainRow>
       <MainColumn>
-        <h1>Turbothrift</h1>
-        <p>
-          Turbothrift is a tool for advanced{" "}
-          <a href="https://tori.fi">tori.fi</a> users. It provides real-time
-          notifications for the search watch (hakuvahti) instead of daily
-          alerts.
-        </p>
-        <GoogleLogin
-          clientId={config.GOOGLE_CLIENT_ID}
-          accessType="offline"
-          prompt="consent"
-          onSuccess={async () => {
-            await doLogin();
-            isSignedIn(true);
-          }}
-          onFailure={(e) => console.error("error logging in", e)}
-        />
+        <header>
+          <h1>Turbothrift</h1>
+        </header>
+        <main>
+          {/* eslint-disable-next-line max-len */}
+          <p>
+            Turbothrift is a tool for advanced{" "}
+            <a href="https://tori.fi">tori.fi</a> users. It provides real-time
+            notifications for the search watch (hakuvahti) instead of daily
+            alerts.
+          </p>
+          <GoogleLogin
+            clientId={config.GOOGLE_CLIENT_ID}
+            accessType="offline"
+            prompt="consent"
+            onSuccess={async () => {
+              await doLogin();
+              isSignedIn(true);
+            }}
+            onFailure={(e) => console.error("error logging in", e)}
+          />
+        </main>
       </MainColumn>
     </MainRow>
   );

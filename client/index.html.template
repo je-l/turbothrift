@@ -1,3 +1,5 @@
+
+<html lang="en">
 <head>
   <title>Turbothrift</title>
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -9,3 +11,4 @@
 <body>
   <div id="app" />
 </body>
+</html>

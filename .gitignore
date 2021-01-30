@@ -3,3 +3,4 @@ node_modules
 *apps.googleusercontent.com.json
 secret_oauth2_credentials.json
 coverage
+*.mp4

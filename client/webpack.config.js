@@ -36,5 +36,6 @@ module.exports = {
   },
   devServer: {
     host: "0.0.0.0",
+    disableHostCheck: true, // For docker e2e tests
   },
 };

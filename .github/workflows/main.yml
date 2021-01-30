@@ -3,6 +3,21 @@ name: CI
 on: push
 
 jobs:
+  test_e2e:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: whoan/docker-build-with-cache-action@v5
+        with:
+          username: _json_key
+          password: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+          registry: gcr.io
+          image_name: turbothrift_e2e
+          context: e2e
+      - run: docker-compose build
+      - run: docker-compose up -d
+      - run: docker run --network=host gcr.io/turbothrift/turbothrift_e2e:latest
+      - run: docker-compose logs
   test_server:
     runs-on: ubuntu-20.04
     steps:
