@@ -10,6 +10,8 @@ services:
       - 8080:8080
     environment:
       - GOOGLE_CLIENT_ID
+    networks:
+      - turbothriftnet
   server:
     image: gcr.io/turbothrift/turbothrift_server_dev
     volumes:
@@ -38,4 +40,4 @@ services:
 
 networks:
   turbothriftnet:
-    name: "turbothriftnet"
+    name: turbothriftnet
