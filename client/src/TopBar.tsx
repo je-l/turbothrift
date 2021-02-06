@@ -1,10 +1,10 @@
-import { useApolloClient } from "@apollo/client";
+import { useApolloClient, useQuery } from "@apollo/client";
 import React from "react";
 import styled from "styled-components";
 import { GoogleLogout } from "react-google-login";
 
 import { isSignedIn } from "./apolloCache";
-import { config } from "./config";
+import { FetchConfigurationResponse, FETCH_CONFIG } from "./common/config";
 
 const TopBracket = styled.div`
   display: flex;
@@ -20,6 +20,11 @@ const LogOutButton = styled(GoogleLogout)`
 
 const TopBar = () => {
   const apollo = useApolloClient();
+  const { loading, data } = useQuery<FetchConfigurationResponse>(FETCH_CONFIG);
+
+  if (loading) {
+    return <p>loading config...</p>;
+  }
 
   const logOut = async () => {
     apollo.clearStore();
@@ -30,7 +35,7 @@ const TopBar = () => {
     <TopBracket>
       <LogOutButton
         buttonText="Log out"
-        clientId={config.GOOGLE_CLIENT_ID}
+        clientId={data!.configuration.googleClientId}
         onLogoutSuccess={logOut}
         onFailure={() => console.error("failed to log out")}
       >

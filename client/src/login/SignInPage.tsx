@@ -1,23 +1,21 @@
-import { gql, useMutation } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import React from "react";
 import { GoogleLogin } from "react-google-login";
 
-import { isSignedIn } from "./apolloCache";
-import { MainColumn, MainRow } from "./common/pageLayout";
-import { config } from "./config";
-
-const LOGIN_ATTEMPT = gql`
-  mutation {
-    loginAttempt
-  }
-`;
-
-interface LoginattemptResponse {
-  loginAttempt: string;
-}
+import { isSignedIn } from "../apolloCache";
+import { FetchConfigurationResponse, FETCH_CONFIG } from "../common/config";
+import { MainColumn, MainRow } from "../common/pageLayout";
+import { LoginattemptResponse, LOGIN_ATTEMPT } from "./loginQuery";
 
 const SignInPage = () => {
   const [doLogin] = useMutation<LoginattemptResponse>(LOGIN_ATTEMPT);
+  const { data, loading } = useQuery<FetchConfigurationResponse>(FETCH_CONFIG, {
+    errorPolicy: "ignore",
+  });
+
+  if (loading) {
+    return <p>loading configuration...</p>;
+  }
 
   return (
     <MainRow>
@@ -34,7 +32,7 @@ const SignInPage = () => {
             alerts.
           </p>
           <GoogleLogin
-            clientId={config.GOOGLE_CLIENT_ID}
+            clientId={data!.configuration.googleClientId}
             accessType="offline"
             prompt="consent"
             onSuccess={async () => {
