@@ -8,8 +8,6 @@ services:
       - /app/node_modules
     ports:
       - 8080:8080
-    environment:
-      - GOOGLE_CLIENT_ID
     networks:
       - turbothriftnet
   server:

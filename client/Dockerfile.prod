@@ -1,7 +1,5 @@
 FROM node:14-buster AS builder
 
-ARG GOOGLE_CLIENT_ID
-
 COPY package-lock.json package.json /build/
 
 WORKDIR /build

@@ -1,7 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const createStyledComponentsTransformer = require("typescript-plugin-styled-components")
   .default;
-const { EnvironmentPlugin } = require("webpack");
 
 const styledComponentsTransformer = createStyledComponentsTransformer();
 
@@ -27,10 +26,7 @@ module.exports = {
       { test: /\.graphql$/, use: "raw-loader" },
     ],
   },
-  plugins: [
-    new HtmlWebpackPlugin({ template: "/index.html.template" }),
-    new EnvironmentPlugin(["GOOGLE_CLIENT_ID"]),
-  ],
+  plugins: [new HtmlWebpackPlugin({ template: "/index.html.template" })],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
