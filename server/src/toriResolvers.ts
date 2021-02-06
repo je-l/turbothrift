@@ -1,11 +1,16 @@
 import { IResolvers } from "apollo-server";
+import { AuthenticationError } from "apollo-server-koa";
 import camelcaseKeys from "camelcase-keys";
 import { IDatabase } from "pg-promise";
+import { env } from "process";
 import { Context, User } from "./toriItem";
 
-/**
- *
- */
+const GOOGLE_CLIENT_ID = env.GOOGLE_CLIENT_ID;
+
+if (!GOOGLE_CLIENT_ID) {
+  throw new Error("google client id missing");
+}
+
 export const createResolvers = (
   db: IDatabase<unknown>
 ): IResolvers<any, Context> => {
@@ -20,6 +25,9 @@ export const createResolvers = (
     },
     Query: {
       user: async (_, args, { user }) => {
+        if (!user) {
+          throw new AuthenticationError("Bearer token missing");
+        }
         const createdUser = await db.one(
           "SELECT * FROM app_user WHERE email = $[email]",
           { email: user.email }
@@ -30,6 +38,11 @@ export const createResolvers = (
       allToriQueries: async () => {
         const items = await db.manyOrNone("SELECT * FROM toriquery");
         return camelcaseKeys(items);
+      },
+      configuration: async () => {
+        return {
+          googleClientId: GOOGLE_CLIENT_ID,
+        };
       },
     },
     Mutation: {

@@ -1,13 +1,10 @@
-import axios from "axios";
 import { Server } from "http";
 import createServer from "./server";
 import { createDbSession } from "./database";
 
-import betterAxiosStacktrace from "axios-better-stacktrace";
 import { IDatabase } from "pg-promise";
 import { IClient } from "pg-promise/typescript/pg-subset";
-
-betterAxiosStacktrace(axios);
+import { fetchGraphql, teardownServer } from "./testSetup";
 
 let koaServer: Server;
 let database: IDatabase<unknown, IClient>;
@@ -19,9 +16,6 @@ jest.mock("./authentication.ts", () => {
   return { verifyGoogleIdToken: fakeVerifyGoogleIdToken };
 });
 
-const fetchGraphql = (query: string) =>
-  axios.post("http://localhost:2000/graphql", { query });
-
 beforeAll((done) => {
   database = createDbSession();
   const server = createServer(database);
@@ -30,20 +24,7 @@ beforeAll((done) => {
   koaServer = server.koaApp.listen(2000, () => done());
 });
 
-afterAll((done) => {
-  koaServer.close((err) => {
-    if (err) {
-      console.error(err);
-    }
-
-    database.$pool
-      .end()
-      .then(() => {
-        done();
-      })
-      .catch((err) => console.error(err));
-  });
-});
+afterAll((done) => teardownServer(koaServer, database, done));
 
 test("Logging in", async () => {
   const loginMutation = `

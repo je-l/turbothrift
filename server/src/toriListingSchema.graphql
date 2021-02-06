@@ -18,7 +18,13 @@ type User {
   searchQueries: [ToriSearch!]!
 }
 
+"environment variables for the client"
+type Configuration {
+  googleClientId: String!
+}
+
 type Query {
+  configuration: Configuration!
   allToriQueries: [ToriSearch!]!
   user: User!
 }

@@ -17,12 +17,13 @@ const googleAuthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
  */
 export const verifyGoogleIdToken = async (
   headers: Record<string, string>
-): Promise<TokenPayload> => {
+): Promise<TokenPayload | null> => {
   const tokenHeader = headers.authorization;
 
   if (!tokenHeader) {
     console.log("token missing");
-    throw new AuthenticationError("token missing from header");
+    // TODO: refactor so that this function doesn't return null
+    return null;
   }
 
   const token = tokenHeader.replace("bearer ", "");
