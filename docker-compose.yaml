@@ -12,6 +12,7 @@ services:
       - turbothriftnet
   server:
     image: gcr.io/turbothrift/turbothrift_server_dev
+    build: server
     volumes:
       - ./server:/app
       - /app/node_modules

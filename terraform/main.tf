@@ -15,7 +15,7 @@ provider "google" {
 }
 
 resource "google_cloud_run_service" "frontendservice" {
-  name     = "Turbothrift frontend service"
+  name     = "turbothrift-client"
   location = local.region
 
   template {

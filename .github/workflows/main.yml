@@ -4,9 +4,19 @@ on: push
 
 jobs:
   test_e2e:
+    needs: [test_client, test_server, test_scrape_job]
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
+      - uses: docker/login-action@v1
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+      - run: docker-compose pull client server
+      - run: docker-compose up -d
+        env:
+          GOOGLE_CLIENT_ID: "${{ secrets.GOOGLE_CLIENT_ID }}"
       - uses: whoan/docker-build-with-cache-action@v5
         with:
           username: _json_key
@@ -14,8 +24,6 @@ jobs:
           registry: gcr.io
           image_name: turbothrift_e2e
           context: e2e
-      - run: docker-compose build
-      - run: docker-compose up -d
       - run: docker run --network=host gcr.io/turbothrift/turbothrift_e2e:latest
       - run: docker-compose logs
   test_server:
@@ -29,7 +37,7 @@ jobs:
           registry: gcr.io
           image_name: turbothrift_server_dev
           context: server
-      - run: docker-compose run --entrypoint "wait-for-it -s database:5432 -- npx jest ." server
+      - run: docker-compose --env-file .env.example run --entrypoint "wait-for-it -s database:5432 -- npx jest ." server
       - run: docker-compose logs
 
   test_client:
@@ -62,7 +70,7 @@ jobs:
       - run: docker-compose logs
 
   build_client:
-    needs: [test_client, test_server, test_scrape_job]
+    needs: [test_e2e]
     runs-on: ubuntu-20.04
     env:
       GOOGLE_CLIENT_ID: "${{ secrets.GOOGLE_CLIENT_ID }}"
