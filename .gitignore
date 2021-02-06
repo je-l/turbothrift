@@ -4,3 +4,5 @@ node_modules
 secret_oauth2_credentials.json
 coverage
 *.mp4
+.terraform
+.terraform.lock.hcl
