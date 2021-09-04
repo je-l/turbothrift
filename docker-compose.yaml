@@ -20,6 +20,7 @@ services:
       - 4000:4000
     environment:
       - GOOGLE_CLIENT_ID
+      - PORT=4000
     networks:
       - turbothriftnet
     depends_on:

@@ -1,0 +1,15 @@
+FROM node:14-alpine as builder
+
+COPY package*json /app/
+
+WORKDIR /app
+
+RUN npm ci
+
+COPY . /app
+
+RUN npm run build:prod
+
+COPY --from=gcr.io/berglas/berglas:latest /bin/berglas /bin/berglas
+
+ENTRYPOINT exec berglas exec -- node src/index.js

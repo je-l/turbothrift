@@ -12,4 +12,4 @@ if (!PORT) {
 const db = createDbSession();
 const { koaApp } = createServer(db);
 
-koaApp.listen({ port: 4000 }, () => console.log("ready"));
+koaApp.listen({ port: PORT }, () => console.log("ready"));

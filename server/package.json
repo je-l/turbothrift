@@ -7,6 +7,7 @@
     "lint": "eslint src",
     "start": "nodemon --watch 'src/**' --ext 'ts,graphql' --exec 'ts-node src/index.ts'",
     "test": "jest .",
+    "build:prod": "tsc --project .",
     "coverage": "jest --coverage ."
   },
   "keywords": [],
