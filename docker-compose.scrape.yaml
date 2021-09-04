@@ -8,6 +8,9 @@ services:
       - EMAIL_SENDER_NAME
       - EMAIL_SENDER_ADDRESS
     build: scrape
+    volumes:
+      - ./scrape:/scrape
+      - /scrape/node_modules
     restart: "no"
     networks:
       - turbothriftnet
